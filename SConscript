@@ -181,8 +181,14 @@ for _var in ("CPPPATH", "LIBPATH"):
 # vendored godot-cpp header warnings into every consumer build.
 godot_cpp_includes = [include for include in test_env.get("CPPPATH", [])
                       if "godot-cpp" in str(include)]
-_is_msvc = (test_env.get("PLATFORM") == "win32" or
-            os.path.basename(str(test_env.get("CC", ""))).lower().startswith("cl"))
+_cc_base = os.path.basename(str(test_env.get("CC", ""))).lower()
+_cc_stem, _ = os.path.splitext(_cc_base)
+_is_msvc = (
+    test_env.get("is_msvc", False)
+    or "msvc" in test_env.get("TOOLS", [])
+    or _cc_stem in ("cl", "clang-cl")
+    or (test_env.get("PLATFORM") == "win32" and _cc_stem not in ("gcc", "g++", "clang", "clang++"))
+)
 if _is_msvc:
     for include in godot_cpp_includes:
         test_env.Append(CCFLAGS=["/external:I", str(include)])
