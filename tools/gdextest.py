@@ -356,13 +356,17 @@ def _write_junit(results: list[dict], path: str) -> None:
     tests = len(results)
     failures = sum(1 for result in results if result.get("status") in ("fail", "crashed"))
     skipped = sum(1 for result in results if result.get("status") == "skipped")
+    total_time = sum(result.get("duration_ms", 0) for result in results) / 1000.0
+    time_str = f"{total_time:.3f}"
     suites = ET.Element("testsuites", {"tests": str(tests),
                                         "failures": str(failures),
-                                        "skipped": str(skipped)})
+                                        "skipped": str(skipped),
+                                        "time": time_str})
     suite = ET.SubElement(suites, "testsuite", {"name": "gdextest",
                                                  "tests": str(tests),
                                                  "failures": str(failures),
-                                                 "skipped": str(skipped)})
+                                                 "skipped": str(skipped),
+                                                 "time": time_str})
     for result in results:
         case = ET.SubElement(suite, "testcase", {
             "classname": result.get("suite", ""),

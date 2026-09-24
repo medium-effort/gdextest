@@ -834,10 +834,17 @@ def test_json_to_junit_conversion() -> None:
         assert 'tests="3"' in xml_text
         assert 'failures="1"' in xml_text
         assert 'skipped="1"' in xml_text
+        assert 'time="0.003"' in xml_text
         assert 'classname="a"' in xml_text
         assert 'name="fails"' in xml_text
         assert "expected a == b" in xml_text
         assert 'message="no service"' in xml_text
+
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(junit_path)
+        assert tree.getroot().attrib.get("time") == "0.003"
+        suite = tree.getroot().find("testsuite")
+        assert suite is not None and suite.attrib.get("time") == "0.003"
 
 
 def test_report_merges_shard_documents() -> None:
